@@ -13,8 +13,8 @@ import { z } from "zod";
  */
 
 const NEXANO_BASE = "https://app.nexano.com.br/api/v1";
-// Endpoint de Checkout (Pix) — requer "Checkout via API" habilitado no painel da Nexano.
-const NEXANO_PIX_PATH = process.env.NEXANO_PIX_PATH || "/gateway/checkout";
+// Caminho do endpoint de criação de Pix. Ajustável via env caso a Nexano use outro path na sua conta.
+const NEXANO_PIX_PATH = process.env.NEXANO_PIX_PATH || "/deposits";
 
 const Input = z.object({
   campaignId: z.string().uuid(),
