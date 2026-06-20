@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tan
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
-import { Home, Compass, Film, MessageCircle, Bell, Settings, Shield, BadgeCheck, LogOut, Megaphone } from "lucide-react";
+import { Home, Compass, Film, MessageCircle, Bell, Settings, Shield, BadgeCheck, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/Avatar";
 
@@ -45,9 +45,6 @@ function AppLayout() {
           ))}
           <Link to="/verification" className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-accent", pathname.startsWith("/verification") && "bg-gradient-brand-soft")}>
             <BadgeCheck className="h-5 w-5" /> Verificação
-          </Link>
-          <Link to="/ads" className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-accent", pathname.startsWith("/ads") && "bg-gradient-brand-soft")}>
-            <Megaphone className="h-5 w-5" /> Anúncios
           </Link>
           {isAdmin && (
             <Link to="/admin" className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-accent", pathname.startsWith("/admin") && "bg-gradient-brand-soft")}>
