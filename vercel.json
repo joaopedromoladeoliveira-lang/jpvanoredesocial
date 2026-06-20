@@ -1,11 +1,12 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": ".output/public",
+  "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": null,
-  "build": {
-    "env": {
-      "NITRO_PRESET": "vercel"
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  }
+  ]
 }
