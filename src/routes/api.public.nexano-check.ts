@@ -18,15 +18,20 @@ export const Route = createFileRoute("/api/public/nexano-check")({
         if (!pub || !sec) return Response.json({ ok: false, presence, error: "missing keys" }, { status: 200 });
 
         const probes: Record<string, { status: number; ok: boolean; sample: string }> = {};
-        const paths = ["/deposits", "/transactions", "/account", "/me"];
+        const paths = [
+          "/api/v1/gateway/producer/credentials",
+          "/api/v1/gateway/producer",
+          "/api/v1/gateway/producer/balance",
+          "/api/v1/gateway/status",
+        ];
         for (const p of paths) {
           try {
-            const r = await fetch(`https://app.nexano.com.br/api/v1${p}`, {
+            const r = await fetch(`https://app.nexano.com.br${p}`, {
               method: "GET",
               headers: { "x-public-key": pub, "x-secret-key": sec, "Content-Type": "application/json" },
             });
             const txt = await r.text();
-            probes[p] = { status: r.status, ok: r.ok, sample: txt.slice(0, 200) };
+            probes[p] = { status: r.status, ok: r.ok, sample: txt.slice(0, 400) };
           } catch (e) {
             probes[p] = { status: 0, ok: false, sample: (e as Error).message };
           }
