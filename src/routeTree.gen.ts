@@ -19,6 +19,7 @@ import { Route as AppNotificationsRouteImport } from './routes/_app.notification
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppFeedRouteImport } from './routes/_app.feed'
 import { Route as AppExploreRouteImport } from './routes/_app.explore'
+import { Route as AppAdsRouteImport } from './routes/_app.ads'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as ApiPublicNexanoWebhookRouteImport } from './routes/api.public.nexano-webhook'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
@@ -72,6 +73,11 @@ const AppExploreRoute = AppExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdsRoute = AppAdsRouteImport.update({
+  id: '/ads',
+  path: '/ads',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
+  '/ads': typeof AppAdsRoute
   '/explore': typeof AppExploreRoute
   '/feed': typeof AppFeedRoute
   '/messages': typeof AppMessagesRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
+  '/ads': typeof AppAdsRoute
   '/explore': typeof AppExploreRoute
   '/feed': typeof AppFeedRoute
   '/messages': typeof AppMessagesRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
+  '/_app/ads': typeof AppAdsRoute
   '/_app/explore': typeof AppExploreRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/messages': typeof AppMessagesRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
+    | '/ads'
     | '/explore'
     | '/feed'
     | '/messages'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
+    | '/ads'
     | '/explore'
     | '/feed'
     | '/messages'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/auth'
     | '/_app/admin'
+    | '/_app/ads'
     | '/_app/explore'
     | '/_app/feed'
     | '/_app/messages'
@@ -257,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExploreRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ads': {
+      id: '/_app/ads'
+      path: '/ads'
+      fullPath: '/ads'
+      preLoaderRoute: typeof AppAdsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -283,6 +302,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
+  AppAdsRoute: typeof AppAdsRoute
   AppExploreRoute: typeof AppExploreRoute
   AppFeedRoute: typeof AppFeedRoute
   AppMessagesRoute: typeof AppMessagesRoute
@@ -295,6 +315,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
+  AppAdsRoute: AppAdsRoute,
   AppExploreRoute: AppExploreRoute,
   AppFeedRoute: AppFeedRoute,
   AppMessagesRoute: AppMessagesRoute,
