@@ -2,8 +2,9 @@ import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tan
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
-import { Home, Compass, Film, MessageCircle, Bell, User, Settings, Shield, BadgeCheck, LogOut } from "lucide-react";
+import { Home, Compass, Film, MessageCircle, Bell, Settings, Shield, BadgeCheck, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/Avatar";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -56,7 +57,7 @@ function AppLayout() {
             <Link to="/profile/$username" params={{ username: profile.username }} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-accent">
               <div className="h-9 w-9 rounded-full bg-gradient-brand p-[2px]">
                 <div className="h-full w-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                  {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : <User className="h-4 w-4" />}
+                  <Avatar path={profile.avatar_url} className="h-full w-full rounded-full" />
                 </div>
               </div>
               <div className="min-w-0 flex-1">
@@ -85,7 +86,7 @@ function AppLayout() {
           <Link to="/profile/$username" params={{ username: profile.username }} className="flex flex-col items-center gap-0.5 px-3 py-1.5">
             <div className="h-6 w-6 rounded-full bg-gradient-brand p-[1.5px]">
               <div className="h-full w-full rounded-full bg-card overflow-hidden">
-                {profile.avatar_url && <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />}
+                <Avatar path={profile.avatar_url} className="h-full w-full rounded-full" />
               </div>
             </div>
           </Link>
