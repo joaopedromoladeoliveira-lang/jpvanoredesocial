@@ -159,13 +159,43 @@ function EditProfileDialog({ profile, onClose, onSaved }: { profile: Profile; on
   const [bio, setBio] = useState(profile.bio || "");
   const [website, setWebsite] = useState(profile.website || "");
   const [username, setUsername] = useState(profile.username);
+  const [avatarPath, setAvatarPath] = useState<string | null>(profile.avatar_url);
+  const [coverPath, setCoverPath] = useState<string | null>(profile.cover_url);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => { if (avatarPath) resolveMedia(avatarPath).then(setAvatarPreview); else setAvatarPreview(""); }, [avatarPath]);
+
+  const pickAvatar = async (file: File) => {
+    setUploading(true);
+    try {
+      const path = await uploadToMedia(file, profile.id, "avatars");
+      setAvatarPath(path);
+    } catch (e) { toast.error((e as Error).message); }
+    setUploading(false);
+  };
+  const pickCover = async (file: File) => {
+    setUploading(true);
+    try {
+      const path = await uploadToMedia(file, profile.id, "covers");
+      setCoverPath(path);
+    } catch (e) { toast.error((e as Error).message); }
+    setUploading(false);
+  };
 
   const save = async () => {
     setSaving(true);
     const u = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
     if (u.length < 3) { toast.error("Username precisa ter 3+ caracteres"); setSaving(false); return; }
-    const { error } = await supabase.from("profiles" as never).update({ display_name: display.slice(0, 60), bio: bio.slice(0, 300), website: website.slice(0, 200), username: u } as never).eq("id", profile.id);
+    const { error } = await supabase.from("profiles" as never).update({
+      display_name: display.slice(0, 60),
+      bio: bio.slice(0, 300),
+      website: website.slice(0, 200),
+      username: u,
+      avatar_url: avatarPath,
+      cover_url: coverPath,
+    } as never).eq("id", profile.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Perfil atualizado!");
@@ -174,13 +204,30 @@ function EditProfileDialog({ profile, onClose, onSaved }: { profile: Profile; on
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full space-y-4" onClick={e => e.stopPropagation()}>
+      <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <h2 className="font-display text-xl font-bold">Editar perfil</h2>
+        <div className="flex items-center gap-4">
+          <div className="h-20 w-20 rounded-full bg-gradient-brand p-[3px]">
+            <div className="h-full w-full rounded-full bg-card overflow-hidden flex items-center justify-center">
+              {avatarPreview ? <img src={avatarPreview} alt="" className="h-full w-full object-cover" /> : <Camera className="h-6 w-6 text-muted-foreground" />}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-gradient-brand text-white px-3 py-2 text-sm font-medium shadow-glow">
+              <Camera className="h-4 w-4" /> Trocar foto
+              <input type="file" accept="image/*" hidden disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) pickAvatar(f); }} />
+            </label>
+            <label className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm">
+              <Camera className="h-4 w-4" /> Trocar capa
+              <input type="file" accept="image/*" hidden disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) pickCover(f); }} />
+            </label>
+          </div>
+        </div>
         <div><label className="text-xs">Nome de usuário</label><Input value={username} onChange={e => setUsername(e.target.value)} /></div>
         <div><label className="text-xs">Nome de exibição</label><Input value={display} onChange={e => setDisplay(e.target.value)} maxLength={60} /></div>
         <div><label className="text-xs">Bio</label><Textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={300} rows={3} /></div>
         <div><label className="text-xs">Website</label><Input value={website} onChange={e => setWebsite(e.target.value)} maxLength={200} /></div>
-        <div className="flex gap-2 justify-end"><Button variant="outline" onClick={onClose}>Cancelar</Button><Button disabled={saving} onClick={save} className="bg-gradient-brand text-white border-0">{saving ? "Salvando..." : "Salvar"}</Button></div>
+        <div className="flex gap-2 justify-end"><Button variant="outline" onClick={onClose}>Cancelar</Button><Button disabled={saving || uploading} onClick={save} className="bg-gradient-brand text-white border-0">{saving ? "Salvando..." : "Salvar"}</Button></div>
       </div>
     </div>
   );
