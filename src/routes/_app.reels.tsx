@@ -65,15 +65,15 @@ function ReelItem({ reel }: { reel: Reel }) {
         {muted ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
       </button>
       <div className="absolute bottom-6 left-4 right-16 text-white space-y-2">
-        <div className="flex items-center gap-2">
+        <Link to="/profile/$username" params={{ username: reel.profile?.username || "" }} className="flex items-center gap-2 w-fit">
           <div className="h-10 w-10 rounded-full bg-gradient-brand p-[2px]"><div className="h-full w-full rounded-full bg-card overflow-hidden">{avatar && <img src={avatar} alt="" className="h-full w-full object-cover" />}</div></div>
           <div className="flex items-center gap-1 font-semibold text-sm">{reel.profile?.username}{reel.profile?.is_verified && <BadgeCheck className="h-3.5 w-3.5 text-[var(--brand-pink)]" />}</div>
-        </div>
+        </Link>
         {reel.caption && <p className="text-sm">{reel.caption}</p>}
       </div>
       <div className="absolute right-4 bottom-20 flex flex-col gap-4 items-center text-white">
         <button onClick={toggleLike} className="flex flex-col items-center"><Heart className={`h-7 w-7 ${liked ? "fill-[var(--brand-pink)] text-[var(--brand-pink)]" : ""}`} /><span className="text-xs">{likes}</span></button>
-        <button className="flex flex-col items-center"><MessageCircle className="h-7 w-7" /><span className="text-xs">{reel.comments_count}</span></button>
+        <Link to="/post/$id" params={{ id: reel.id }} className="flex flex-col items-center"><MessageCircle className="h-7 w-7" /><span className="text-xs">{reel.comments_count}</span></Link>
       </div>
     </div>
   );
