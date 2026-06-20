@@ -57,7 +57,7 @@ function AppLayout() {
             <Link to="/profile/$username" params={{ username: profile.username }} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-accent">
               <div className="h-9 w-9 rounded-full bg-gradient-brand p-[2px]">
                 <div className="h-full w-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                  {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : <User className="h-4 w-4" />}
+                  <Avatar path={profile.avatar_url} className="h-full w-full rounded-full" />
                 </div>
               </div>
               <div className="min-w-0 flex-1">
