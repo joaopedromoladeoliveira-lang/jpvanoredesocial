@@ -15,8 +15,12 @@ function Explore() {
   const [people, setPeople] = useState<{ id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean }[]>([]);
   const [q, setQ] = useState("");
 
+  const loadPosts = () => supabase.from("posts" as never).select("id,media_urls,likes_count").neq("kind", "reel").order("likes_count", { ascending: false }).limit(30).then(({ data }) => setPosts(((data as never[]) || []) as never));
+
+  useEffect(() => { loadPosts(); }, []);
   useEffect(() => {
-    supabase.from("posts" as never).select("id,media_urls,likes_count").neq("kind", "reel").order("likes_count", { ascending: false }).limit(30).then(({ data }) => setPosts(((data as never[]) || []) as never));
+    const ch = supabase.channel("explore-posts").on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => loadPosts()).subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
   useEffect(() => {
     if (!q) { setPeople([]); return; }
@@ -40,7 +44,7 @@ function Explore() {
       )}
       <h2 className="font-display text-xl font-bold mb-4">Em alta</h2>
       <div className="grid grid-cols-3 gap-1">
-        {posts.map(p => <Thumb key={p.id} path={p.media_urls[0]} />)}
+        {posts.map(p => <Thumb key={p.id} id={p.id} path={p.media_urls[0]} />)}
       </div>
     </div>
   );
@@ -56,8 +60,12 @@ function PersonRow({ p }: { p: { id: string; username: string; display_name: str
     </Link>
   );
 }
-function Thumb({ path }: { path?: string }) {
+function Thumb({ id, path }: { id: string; path?: string }) {
   const [url, setUrl] = useState("");
   useEffect(() => { if (path) resolveMedia(path).then(setUrl); }, [path]);
-  return <div className="aspect-square bg-muted overflow-hidden">{url && <img src={url} alt="" className="h-full w-full object-cover" />}</div>;
+  return (
+    <Link to="/post/$id" params={{ id }} className="aspect-square bg-muted overflow-hidden block hover:opacity-90 transition">
+      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+    </Link>
+  );
 }
