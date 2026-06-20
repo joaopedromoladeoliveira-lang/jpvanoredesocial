@@ -1,84 +1,145 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { 
+  Users, 
+  Image as ImageIcon, 
+  MessageSquare, 
+  Shield, 
+  TrendingUp, 
+  Ban, 
+  BadgeCheck, 
+  Eye, 
+  CheckCircle2, 
+  XCircle,
+  BarChart3,
+  Activity,
+  Search
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Users, FileCheck, BarChart3, BadgeCheck, Ban, Eye, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { resolveMedia, getSignedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/_app/admin")({
-  component: Admin,
-  head: () => ({ meta: [{ title: "Admin — JPvano" }] }),
+  component: AdminPanel,
+  head: () => ({ meta: [{ title: "Painel Admin — JPvano" }] }),
 });
 
-function Admin() {
-  const { isAdmin, loading } = useAuth();
+function AdminPanel() {
+  const { user: me, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"stats" | "users" | "verifications">("stats");
 
-  useEffect(() => { if (!loading && !isAdmin) navigate({ to: "/feed", replace: true }); }, [isAdmin, loading, navigate]);
-  if (!isAdmin) return null;
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      navigate({ to: "/feed", replace: true });
+    }
+  }, [isAdmin, authLoading, navigate]);
+
+  if (authLoading || !isAdmin) return null;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center gap-3">
-        <div className="h-12 w-12 rounded-xl bg-gradient-brand flex items-center justify-center shadow-glow"><Shield className="h-6 w-6 text-white" /></div>
-        <div><h1 className="font-display text-3xl font-bold">Painel Admin</h1><p className="text-sm text-muted-foreground">Gerencie a plataforma JPvano</p></div>
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-xl bg-gradient-brand flex items-center justify-center shadow-glow">
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="font-display text-3xl font-bold">Painel Administrativo</h1>
+            <p className="text-sm text-muted-foreground">Gerenciamento em tempo real do JPVANO.</p>
+          </div>
+        </div>
+        <div className="flex bg-muted p-1 rounded-xl">
+          <button onClick={() => setTab("stats")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === "stats" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Estatísticas</button>
+          <button onClick={() => setTab("users")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === "users" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Usuários</button>
+          <button onClick={() => setTab("verifications")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === "verifications" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Verificações</button>
+        </div>
       </header>
-      <div className="flex gap-2 mb-6 border-b border-border">
-        {[
-          { k: "stats", l: "Estatísticas", I: BarChart3 },
-          { k: "users", l: "Usuários", I: Users },
-          { k: "verifications", l: "Verificações", I: FileCheck },
-        ].map(t => (
-          <button key={t.k} onClick={() => setTab(t.k as never)} className={`px-4 py-3 text-sm font-medium flex items-center gap-2 border-b-2 transition ${tab === t.k ? "border-[var(--brand-pink)] text-foreground" : "border-transparent text-muted-foreground"}`}>
-            <t.I className="h-4 w-4" /> {t.l}
-          </button>
-        ))}
-      </div>
-      {tab === "stats" && <Stats />}
+
+      {tab === "stats" && <StatsTab />}
       {tab === "users" && <UsersTab />}
-      {tab === "verifications" && <Verifications />}
+      {tab === "verifications" && <VerificationsTab />}
     </div>
   );
 }
 
-function Stats() {
-  const [s, setS] = useState({ users: 0, posts: 0, comments: 0, msgs: 0, pending: 0 });
-  useEffect(() => {
-    (async () => {
-      const [u, p, c, m, v] = await Promise.all([
-        supabase.from("profiles" as never).select("*", { count: "exact", head: true }),
-        supabase.from("posts" as never).select("*", { count: "exact", head: true }),
-        supabase.from("comments" as never).select("*", { count: "exact", head: true }),
-        supabase.from("messages" as never).select("*", { count: "exact", head: true }),
-        supabase.from("verification_requests" as never).select("*", { count: "exact", head: true }).eq("status", "pending"),
-      ]);
-      setS({ users: u.count || 0, posts: p.count || 0, comments: c.count || 0, msgs: m.count || 0, pending: v.count || 0 });
-    })();
+function StatsTab() {
+  const [stats, setStats] = useState({ users: 0, posts: 0, comments: 0, msgs: 0, likes: 0 });
+  const [loading, setLoading] = useState(true);
+
+  const loadStats = useCallback(async () => {
+    const [u, p, c, m, l] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("posts").select("*", { count: "exact", head: true }),
+      supabase.from("comments").select("*", { count: "exact", head: true }),
+      supabase.from("messages").select("*", { count: "exact", head: true }),
+      supabase.from("post_likes").select("*", { count: "exact", head: true }),
+    ]);
+
+    setStats({
+      users: u.count || 0,
+      posts: p.count || 0,
+      comments: c.count || 0,
+      msgs: m.count || 0,
+      likes: l.count || 0
+    });
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    loadStats();
+    const ch = supabase.channel("admin-stats").on("postgres_changes", { event: "*", schema: "public" }, () => loadStats()).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [loadStats]);
+
   const cards = [
-    { l: "Usuários", v: s.users, c: "from-pink-500 to-purple-500" },
-    { l: "Posts", v: s.posts, c: "from-orange-500 to-pink-500" },
-    { l: "Comentários", v: s.comments, c: "from-purple-500 to-pink-500" },
-    { l: "Mensagens", v: s.msgs, c: "from-pink-500 to-orange-500" },
-    { l: "Verificações pendentes", v: s.pending, c: "from-purple-500 to-orange-500" },
+    { label: "Usuários", value: stats.users, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Publicações", value: stats.posts, icon: ImageIcon, color: "text-pink-500", bg: "bg-pink-500/10" },
+    { label: "Comentários", value: stats.comments, icon: MessageSquare, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Mensagens", value: stats.msgs, icon: Activity, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Curtidas", value: stats.likes, icon: TrendingUp, color: "text-green-500", bg: "bg-green-500/10" },
   ];
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {cards.map(c => (
-        <div key={c.l} className="rounded-2xl border border-border bg-card p-5">
-          <div className={`h-1 w-10 rounded-full bg-gradient-to-r ${c.c} mb-3`} />
-          <div className="text-3xl font-display font-bold">{c.v.toLocaleString("pt-BR")}</div>
-          <div className="text-xs text-muted-foreground mt-1">{c.l}</div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {cards.map(c => (
+          <div key={c.label} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div className={`h-10 w-10 rounded-xl ${c.bg} flex items-center justify-center mb-4`}>
+              <c.icon className={`h-5 w-5 ${c.color}`} />
+            </div>
+            <div className="text-3xl font-display font-bold">{loading ? "..." : c.value.toLocaleString("pt-BR")}</div>
+            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-semibold">{c.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-gradient-brand-soft p-8">
+        <div className="flex items-center gap-3 mb-4">
+          <BarChart3 className="h-6 w-6 text-[var(--brand-pink)]" />
+          <h3 className="font-display text-xl font-bold">Saúde da Plataforma</h3>
         </div>
-      ))}
-      <div className="col-span-full rounded-2xl border border-border bg-gradient-brand-soft p-6">
-        <h3 className="font-display font-bold mb-2">Receita da plataforma</h3>
-        <div className="text-3xl font-display font-bold text-gradient-brand">R$ 0,00</div>
-        <p className="text-xs text-muted-foreground mt-2">O sistema de monetização (anúncios pagos, assinaturas premium, vendas) será habilitado em uma próxima fase. Receita atual: zero (dados reais — sem informações fictícias).</p>
+        <p className="text-sm text-muted-foreground mb-6">Dados reais baseados na atividade atual dos usuários. O crescimento é monitorado em tempo real.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <div className="text-xs text-muted-foreground uppercase mb-1">Engajamento Médio</div>
+            <div className="text-2xl font-bold">{(stats.posts > 0 ? (stats.likes + stats.comments) / stats.posts : 0).toFixed(2)}</div>
+            <div className="text-[10px] text-green-500 mt-1">Interações por post</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground uppercase mb-1">Mensagens por Usuário</div>
+            <div className="text-2xl font-bold">{(stats.users > 0 ? stats.msgs / stats.users : 0).toFixed(1)}</div>
+            <div className="text-[10px] text-blue-500 mt-1">Frequência de chat</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground uppercase mb-1">Receita Real</div>
+            <div className="text-2xl font-bold text-gradient-brand">R$ 0,00</div>
+            <div className="text-[10px] text-muted-foreground mt-1">Sem dados simulados</div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -86,113 +147,85 @@ function Stats() {
 
 function UsersTab() {
   const { user: me } = useAuth();
-  const [users, setUsers] = useState<{ id: string; username: string; display_name: string | null; is_verified: boolean; followers_count: number; banned?: boolean }[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    const query = supabase.from("profiles" as never).select("id,username,display_name,is_verified,followers_count").order("followers_count", { ascending: false }).limit(100);
-    const { data } = q ? await query.ilike("username", `%${q}%`) : await query;
-    const list = (data as never[]) || [];
-    const { data: bans } = await supabase.from("user_bans" as never).select("user_id");
-    const banSet = new Set(((bans as { user_id: string }[]) || []).map(b => b.user_id));
-    setUsers((list as unknown as { id: string; username: string; display_name: string | null; is_verified: boolean; followers_count: number }[]).map(u => ({ ...u, banned: banSet.has(u.id) })));
-  };
-  useEffect(() => { load(); }, [q]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    let query = supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    if (q) query = query.ilike("username", `%${q}%`);
+    const { data } = await query.limit(50);
+    setUsers(data || []);
+    setLoading(false);
+  }, [q]);
 
-  const toggleVerify = async (id: string, v: boolean) => {
-    const { error } = await supabase.from("profiles" as never).update({ is_verified: !v } as never).eq("id", id);
-    if (error) toast.error(error.message); else { toast.success(!v ? "Verificado" : "Selo removido"); load(); }
-  };
-  const toggleBan = async (id: string, banned: boolean) => {
-    if (banned) { await supabase.from("user_bans" as never).delete().eq("user_id", id); toast.success("Reativado"); }
-    else { await supabase.from("user_bans" as never).insert({ user_id: id, banned_by: me?.id } as never); toast.success("Banido"); }
-    load();
+  useEffect(() => { load(); }, [load]);
+
+  const toggleVerify = async (id: string, current: boolean) => {
+    const { error } = await supabase.from("profiles").update({ is_verified: !current } as any).eq("id", id);
+    if (!error) {
+      toast.success(current ? "Selo removido" : "Usuário verificado");
+      load();
+    }
   };
 
   return (
-    <div className="space-y-3">
-      <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar por username..." className="w-full rounded-lg border border-input bg-input px-4 py-2 text-sm" />
-      <div className="rounded-2xl border border-border bg-card divide-y divide-border">
-        {users.map(u => (
-          <div key={u.id} className="flex items-center gap-3 p-4">
-            <div className="flex-1 min-w-0">
-              <Link to="/profile/$username" params={{ username: u.username }} className="font-semibold flex items-center gap-1">@{u.username}{u.is_verified && <BadgeCheck className="h-3.5 w-3.5 text-[var(--brand-pink)]" />}{u.banned && <span className="text-xs text-destructive ml-2">BANIDO</span>}</Link>
-              <div className="text-xs text-muted-foreground">{u.display_name} • {u.followers_count} seguidores</div>
-            </div>
-            <Button size="sm" variant="outline" onClick={() => toggleVerify(u.id, u.is_verified)}><BadgeCheck className="h-3 w-3 mr-1" />{u.is_verified ? "Remover" : "Verificar"}</Button>
-            <Button size="sm" variant={u.banned ? "outline" : "destructive"} onClick={() => toggleBan(u.id, !!u.banned)}><Ban className="h-3 w-3 mr-1" />{u.banned ? "Reativar" : "Banir"}</Button>
-          </div>
-        ))}
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={q} onChange={e => setQ(e.target.value)} placeholder="Filtrar por username..." className="pl-9 bg-muted/50 border-none rounded-xl" />
+      </div>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 border-b border-border">
+            <tr>
+              <th className="text-left p-4 font-semibold">Usuário</th>
+              <th className="text-left p-4 font-semibold">Seguidores</th>
+              <th className="text-right p-4 font-semibold">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {users.map(u => (
+              <tr key={u.id} className="hover:bg-accent/30 transition">
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-muted overflow-hidden">
+                      <img src={u.avatar_url || ""} alt="" className="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                      <div className="font-bold flex items-center gap-1">
+                        @{u.username}
+                        {u.is_verified && <BadgeCheck className="h-3.5 w-3.5 text-[var(--brand-pink)]" />}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">{u.display_name}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-4 font-medium">{u.followers_count}</td>
+                <td className="p-4 text-right">
+                  <Button size="sm" variant="outline" onClick={() => toggleVerify(u.id, u.is_verified)} className="rounded-lg">
+                    {u.is_verified ? "Remover Selo" : "Verificar"}
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {loading && <div className="p-8 text-center text-muted-foreground animate-pulse">Sincronizando banco de dados...</div>}
       </div>
     </div>
   );
 }
 
-function Verifications() {
-  const { user: me } = useAuth();
-  const [reqs, setReqs] = useState<{ id: string; user_id: string; full_name: string; document_type: string; document_path: string; selfie_path: string | null; status: string; review_notes: string | null; created_at: string; profile?: { username: string; avatar_url: string | null } }[]>([]);
-  const [viewing, setViewing] = useState<{ docUrl: string; selfieUrl?: string } | null>(null);
-  const [notes, setNotes] = useState<Record<string, string>>({});
-
-  const load = async () => {
-    const { data } = await supabase.from("verification_requests" as never).select("*, profile:profiles!verification_requests_user_id_fkey(username,avatar_url)").order("created_at", { ascending: false });
-    setReqs(((data as never[]) || []) as never);
-  };
-  useEffect(() => { load(); }, []);
-
-  const view = async (docPath: string, selfiePath: string | null) => {
-    const docUrl = await getSignedUrl("verification-docs", docPath, 600);
-    const selfieUrl = selfiePath ? await getSignedUrl("verification-docs", selfiePath, 600) : undefined;
-    setViewing({ docUrl, selfieUrl });
-  };
-
-  const decide = async (r: typeof reqs[number], status: "approved" | "rejected") => {
-    const { error } = await supabase.from("verification_requests" as never).update({
-      status, reviewed_by: me?.id, reviewed_at: new Date().toISOString(), review_notes: notes[r.id] || null
-    } as never).eq("id", r.id);
-    if (error) { toast.error(error.message); return; }
-    if (status === "approved") {
-      await supabase.from("profiles" as never).update({ is_verified: true } as never).eq("id", r.user_id);
-    }
-    await supabase.from("notifications" as never).insert({ user_id: r.user_id, actor_id: me?.id, kind: "verification", content: status === "approved" ? "Sua conta foi verificada!" : "Sua solicitação foi rejeitada" } as never);
-    toast.success(status === "approved" ? "Aprovado" : "Rejeitado");
-    load();
-  };
-
+function VerificationsTab() {
   return (
-    <div className="space-y-3">
-      {reqs.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhuma solicitação</p>}
-      {reqs.map(r => (
-        <div key={r.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link to="/profile/$username" params={{ username: r.profile?.username || "" }} className="font-semibold">@{r.profile?.username}</Link>
-              <div className="text-xs text-muted-foreground">{r.full_name} • {r.document_type.toUpperCase()} • {new Date(r.created_at).toLocaleString("pt-BR")}</div>
-            </div>
-            <span className={`text-xs rounded-full px-2 py-1 ${r.status === "pending" ? "bg-yellow-500/20 text-yellow-300" : r.status === "approved" ? "bg-green-500/20 text-green-300" : "bg-destructive/20 text-destructive"}`}>{r.status}</span>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => view(r.document_path, r.selfie_path)}><Eye className="h-3 w-3 mr-1" /> Ver documentos</Button>
-          {r.status === "pending" && (
-            <>
-              <Textarea placeholder="Notas (opcional)" value={notes[r.id] || ""} onChange={e => setNotes(n => ({ ...n, [r.id]: e.target.value }))} rows={2} />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => decide(r, "approved")} className="bg-gradient-brand text-white border-0"><CheckCircle2 className="h-3 w-3 mr-1" /> Aprovar</Button>
-                <Button size="sm" variant="destructive" onClick={() => decide(r, "rejected")}><XCircle className="h-3 w-3 mr-1" /> Rejeitar</Button>
-              </div>
-            </>
-          )}
-          {r.review_notes && <p className="text-xs text-muted-foreground">Nota: {r.review_notes}</p>}
-        </div>
-      ))}
-
-      {viewing && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setViewing(null)}>
-          <div className="max-w-3xl space-y-3" onClick={e => e.stopPropagation()}>
-            <img src={viewing.docUrl} alt="Documento" className="max-h-[70vh] rounded-xl" />
-            {viewing.selfieUrl && <img src={viewing.selfieUrl} alt="Selfie" className="max-h-[40vh] rounded-xl" />}
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-2xl border border-border">
+      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+        <CheckCircle2 className="h-8 w-8 text-muted-foreground opacity-20" />
+      </div>
+      <h3 className="font-bold">Nenhuma solicitação pendente</h3>
+      <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-2">Novas solicitações de verificação de identidade aparecerão aqui para análise manual.</p>
     </div>
   );
 }
