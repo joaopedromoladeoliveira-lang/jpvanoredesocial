@@ -14,6 +14,198 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          advertiser_id: string
+          amount_paid_cents: number
+          budget_cents: number
+          caption: string | null
+          clicks: number
+          created_at: string
+          cta_label: string | null
+          cta_url: string
+          ends_at: string | null
+          id: string
+          impressions: number
+          media_url: string
+          starts_at: string
+          status: Database["public"]["Enums"]["ad_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          amount_paid_cents?: number
+          budget_cents: number
+          caption?: string | null
+          clicks?: number
+          created_at?: string
+          cta_label?: string | null
+          cta_url: string
+          ends_at?: string | null
+          id?: string
+          impressions?: number
+          media_url: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          amount_paid_cents?: number
+          budget_cents?: number
+          caption?: string | null
+          clicks?: number
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string
+          ends_at?: string | null
+          id?: string
+          impressions?: number
+          media_url?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_impressions: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          kind: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_impressions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_payments: {
+        Row: {
+          amount_cents: number
+          campaign_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          paid_at: string | null
+          payment_method: string
+          pix_qr_code: string | null
+          pix_qr_image: string | null
+          provider: string
+          provider_tx_id: string | null
+          raw_payload: Json | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          campaign_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string
+          pix_qr_code?: string | null
+          pix_qr_image?: string | null
+          provider?: string
+          provider_tx_id?: string | null
+          raw_payload?: Json | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          campaign_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string
+          pix_qr_code?: string | null
+          pix_qr_image?: string | null
+          provider?: string
+          provider_tx_id?: string | null
+          raw_payload?: Json | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_payments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advertisers: {
+        Row: {
+          brand_name: string
+          created_at: string
+          email: string
+          id: string
+          logo_url: string | null
+          tax_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          email: string
+          id?: string
+          logo_url?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          logo_url?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -430,6 +622,13 @@ export type Database = {
       }
     }
     Enums: {
+      ad_status:
+        | "draft"
+        | "pending_payment"
+        | "active"
+        | "paused"
+        | "completed"
+        | "rejected"
       app_role: "admin" | "user"
       notification_kind:
         | "like"
@@ -439,6 +638,7 @@ export type Database = {
         | "message"
         | "verification"
         | "system"
+      payment_status: "pending" | "paid" | "failed" | "refunded" | "expired"
       post_kind: "photo" | "video" | "carousel" | "reel" | "text"
       verification_status: "pending" | "reviewing" | "approved" | "rejected"
     }
@@ -568,6 +768,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_status: [
+        "draft",
+        "pending_payment",
+        "active",
+        "paused",
+        "completed",
+        "rejected",
+      ],
       app_role: ["admin", "user"],
       notification_kind: [
         "like",
@@ -578,6 +786,7 @@ export const Constants = {
         "verification",
         "system",
       ],
+      payment_status: ["pending", "paid", "failed", "refunded", "expired"],
       post_kind: ["photo", "video", "carousel", "reel", "text"],
       verification_status: ["pending", "reviewing", "approved", "rejected"],
     },

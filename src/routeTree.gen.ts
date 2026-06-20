@@ -19,7 +19,9 @@ import { Route as AppNotificationsRouteImport } from './routes/_app.notification
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppFeedRouteImport } from './routes/_app.feed'
 import { Route as AppExploreRouteImport } from './routes/_app.explore'
+import { Route as AppAdsRouteImport } from './routes/_app.ads'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as ApiPublicNexanoWebhookRouteImport } from './routes/api.public.nexano-webhook'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
 
 const AuthRoute = AuthRouteImport.update({
@@ -71,10 +73,20 @@ const AppExploreRoute = AppExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdsRoute = AppAdsRouteImport.update({
+  id: '/ads',
+  path: '/ads',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiPublicNexanoWebhookRoute = ApiPublicNexanoWebhookRouteImport.update({
+  id: '/api/public/nexano-webhook',
+  path: '/api/public/nexano-webhook',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppProfileUsernameRoute = AppProfileUsernameRouteImport.update({
   id: '/profile/$username',
@@ -86,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
+  '/ads': typeof AppAdsRoute
   '/explore': typeof AppExploreRoute
   '/feed': typeof AppFeedRoute
   '/messages': typeof AppMessagesRoute
@@ -94,11 +107,13 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/verification': typeof AppVerificationRoute
   '/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
+  '/ads': typeof AppAdsRoute
   '/explore': typeof AppExploreRoute
   '/feed': typeof AppFeedRoute
   '/messages': typeof AppMessagesRoute
@@ -107,6 +122,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/verification': typeof AppVerificationRoute
   '/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +130,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
+  '/_app/ads': typeof AppAdsRoute
   '/_app/explore': typeof AppExploreRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/messages': typeof AppMessagesRoute
@@ -122,6 +139,7 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/verification': typeof AppVerificationRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
+    | '/ads'
     | '/explore'
     | '/feed'
     | '/messages'
@@ -137,11 +156,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/profile/$username'
+    | '/api/public/nexano-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/admin'
+    | '/ads'
     | '/explore'
     | '/feed'
     | '/messages'
@@ -150,12 +171,14 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/profile/$username'
+    | '/api/public/nexano-webhook'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/auth'
     | '/_app/admin'
+    | '/_app/ads'
     | '/_app/explore'
     | '/_app/feed'
     | '/_app/messages'
@@ -164,12 +187,14 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/verification'
     | '/_app/profile/$username'
+    | '/api/public/nexano-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicNexanoWebhookRoute: typeof ApiPublicNexanoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -244,12 +269,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExploreRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ads': {
+      id: '/_app/ads'
+      path: '/ads'
+      fullPath: '/ads'
+      preLoaderRoute: typeof AppAdsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/public/nexano-webhook': {
+      id: '/api/public/nexano-webhook'
+      path: '/api/public/nexano-webhook'
+      fullPath: '/api/public/nexano-webhook'
+      preLoaderRoute: typeof ApiPublicNexanoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/profile/$username': {
       id: '/_app/profile/$username'
@@ -263,6 +302,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
+  AppAdsRoute: typeof AppAdsRoute
   AppExploreRoute: typeof AppExploreRoute
   AppFeedRoute: typeof AppFeedRoute
   AppMessagesRoute: typeof AppMessagesRoute
@@ -275,6 +315,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
+  AppAdsRoute: AppAdsRoute,
   AppExploreRoute: AppExploreRoute,
   AppFeedRoute: AppFeedRoute,
   AppMessagesRoute: AppMessagesRoute,
@@ -291,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicNexanoWebhookRoute: ApiPublicNexanoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
