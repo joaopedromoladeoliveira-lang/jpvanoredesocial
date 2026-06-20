@@ -15,8 +15,12 @@ function Explore() {
   const [people, setPeople] = useState<{ id: string; username: string; display_name: string | null; avatar_url: string | null; is_verified: boolean }[]>([]);
   const [q, setQ] = useState("");
 
+  const loadPosts = () => supabase.from("posts" as never).select("id,media_urls,likes_count").neq("kind", "reel").order("likes_count", { ascending: false }).limit(30).then(({ data }) => setPosts(((data as never[]) || []) as never));
+
+  useEffect(() => { loadPosts(); }, []);
   useEffect(() => {
-    supabase.from("posts" as never).select("id,media_urls,likes_count").neq("kind", "reel").order("likes_count", { ascending: false }).limit(30).then(({ data }) => setPosts(((data as never[]) || []) as never));
+    const ch = supabase.channel("explore-posts").on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => loadPosts()).subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
   useEffect(() => {
     if (!q) { setPeople([]); return; }
