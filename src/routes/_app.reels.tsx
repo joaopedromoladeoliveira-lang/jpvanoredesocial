@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveMedia } from "@/lib/storage";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
@@ -16,17 +16,21 @@ type Reel = { id: string; user_id: string; caption: string | null; media_urls: s
 
 function Reels() {
   const [reels, setReels] = useState<Reel[]>([]);
-  const load = async () => {
+  const load = useCallback(async () => {
     const { data } = await supabase.from("posts" as never)
       .select("*, profile:profiles!posts_user_id_fkey(username,display_name,avatar_url,is_verified)")
       .eq("kind", "reel").order("created_at", { ascending: false }).limit(30);
     setReels(((data as never[]) || []) as Reel[]);
-  };
-  useEffect(() => { load(); }, []);
-  useEffect(() => {
-    const ch = supabase.channel("reels").on("postgres_changes", { event: "*", schema: "public", table: "posts", filter: "kind=eq.reel" }, load).subscribe();
-    return () => { supabase.removeChannel(ch); };
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const ch = supabase.channel("reels")
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [load]);
 
   return (
     <div className="mx-auto max-w-md h-[calc(100vh-5rem)] md:h-screen overflow-y-auto snap-y snap-mandatory scrollbar-hide">

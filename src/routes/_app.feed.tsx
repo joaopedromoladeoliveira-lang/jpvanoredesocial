@@ -39,8 +39,7 @@ function Feed() {
 
   useEffect(() => {
     const ch = supabase.channel("feed-posts")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, () => load())
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "posts" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [load]);

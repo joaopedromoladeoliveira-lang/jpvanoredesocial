@@ -39,6 +39,10 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
   }, [post.media_urls, post.profile?.avatar_url]);
 
   useEffect(() => {
+    setLikes(post.likes_count);
+  }, [post.likes_count]);
+
+  useEffect(() => {
     if (!user) return;
     supabase.from("post_likes" as never).select("post_id").eq("post_id", post.id).eq("user_id", user.id).maybeSingle().then(({ data }) => setLiked(!!data));
     supabase.from("saved_posts" as never).select("post_id").eq("post_id", post.id).eq("user_id", user.id).maybeSingle().then(({ data }) => setSaved(!!data));
