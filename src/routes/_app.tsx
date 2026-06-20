@@ -2,8 +2,9 @@ import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tan
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
-import { Home, Compass, Film, MessageCircle, Bell, User, Settings, Shield, BadgeCheck, LogOut } from "lucide-react";
+import { Home, Compass, Film, MessageCircle, Bell, Settings, Shield, BadgeCheck, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar } from "@/components/Avatar";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
