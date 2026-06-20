@@ -107,7 +107,7 @@ export const createNexanoPixPayment = createServerFn({ method: "POST" })
         pix_qr_code: qrCode,
         pix_qr_image: qrImage,
         expires_at: expiresAt,
-        raw_payload: json,
+        raw_payload: json as unknown as never,
       })
       .select("id, pix_qr_code, pix_qr_image, expires_at")
       .single();

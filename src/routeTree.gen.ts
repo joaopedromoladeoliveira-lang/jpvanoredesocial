@@ -20,6 +20,7 @@ import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppFeedRouteImport } from './routes/_app.feed'
 import { Route as AppExploreRouteImport } from './routes/_app.explore'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as ApiPublicNexanoWebhookRouteImport } from './routes/api.public.nexano-webhook'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
 
 const AuthRoute = AuthRouteImport.update({
@@ -76,6 +77,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicNexanoWebhookRoute = ApiPublicNexanoWebhookRouteImport.update({
+  id: '/api/public/nexano-webhook',
+  path: '/api/public/nexano-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppProfileUsernameRoute = AppProfileUsernameRouteImport.update({
   id: '/profile/$username',
   path: '/profile/$username',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/verification': typeof AppVerificationRoute
   '/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/verification': typeof AppVerificationRoute
   '/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/verification': typeof AppVerificationRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
+  '/api/public/nexano-webhook': typeof ApiPublicNexanoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/profile/$username'
+    | '/api/public/nexano-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/profile/$username'
+    | '/api/public/nexano-webhook'
   id:
     | '__root__'
     | '/'
@@ -164,12 +175,14 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/verification'
     | '/_app/profile/$username'
+    | '/api/public/nexano-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicNexanoWebhookRoute: typeof ApiPublicNexanoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/nexano-webhook': {
+      id: '/api/public/nexano-webhook'
+      path: '/api/public/nexano-webhook'
+      fullPath: '/api/public/nexano-webhook'
+      preLoaderRoute: typeof ApiPublicNexanoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/profile/$username': {
       id: '/_app/profile/$username'
       path: '/profile/$username'
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicNexanoWebhookRoute: ApiPublicNexanoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
