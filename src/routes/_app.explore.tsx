@@ -60,8 +60,12 @@ function PersonRow({ p }: { p: { id: string; username: string; display_name: str
     </Link>
   );
 }
-function Thumb({ path }: { path?: string }) {
+function Thumb({ id, path }: { id: string; path?: string }) {
   const [url, setUrl] = useState("");
   useEffect(() => { if (path) resolveMedia(path).then(setUrl); }, [path]);
-  return <div className="aspect-square bg-muted overflow-hidden">{url && <img src={url} alt="" className="h-full w-full object-cover" />}</div>;
+  return (
+    <Link to="/post/$id" params={{ id }} className="aspect-square bg-muted overflow-hidden block hover:opacity-90 transition">
+      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+    </Link>
+  );
 }
