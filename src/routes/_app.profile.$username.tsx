@@ -46,6 +46,14 @@ function ProfilePage() {
   };
   useEffect(() => { load(); }, [username, user?.id]);
 
+  useEffect(() => {
+    if (!profile?.id) return;
+    const ch = supabase.channel(`profile-posts-${profile.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts", filter: `user_id=eq.${profile.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [profile?.id]);
+
   if (!profile) return <div className="p-10 text-center text-muted-foreground">Carregando perfil...</div>;
   const isOwn = user?.id === profile.id;
 
@@ -129,9 +137,9 @@ function GridThumb({ post }: { post: never }) {
   const [url, setUrl] = useState("");
   useEffect(() => { if (p.media_urls[0]) resolveMedia(p.media_urls[0]).then(setUrl); }, [p.media_urls]);
   return (
-    <div className="aspect-square bg-muted overflow-hidden">
+    <Link to="/post/$id" params={{ id: p.id }} className="aspect-square bg-muted overflow-hidden block hover:opacity-90 transition">
       {url && (url.match(/\.(mp4|webm|mov)/i) ? <video src={url} className="h-full w-full object-cover" /> : <img src={url} alt="" className="h-full w-full object-cover" />)}
-    </div>
+    </Link>
   );
 }
 
