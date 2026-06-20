@@ -44,7 +44,7 @@ function Explore() {
       )}
       <h2 className="font-display text-xl font-bold mb-4">Em alta</h2>
       <div className="grid grid-cols-3 gap-1">
-        {posts.map(p => <Thumb key={p.id} path={p.media_urls[0]} />)}
+        {posts.map(p => <Thumb key={p.id} id={p.id} path={p.media_urls[0]} />)}
       </div>
     </div>
   );
