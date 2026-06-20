@@ -95,7 +95,7 @@ function UsersTab() {
     const list = (data as never[]) || [];
     const { data: bans } = await supabase.from("user_bans" as never).select("user_id");
     const banSet = new Set(((bans as { user_id: string }[]) || []).map(b => b.user_id));
-    setUsers((list as { id: string }[]).map(u => ({ ...(u as never), banned: banSet.has(u.id) })));
+    setUsers((list as unknown as { id: string; username: string; display_name: string | null; is_verified: boolean; followers_count: number }[]).map(u => ({ ...u, banned: banSet.has(u.id) })));
   };
   useEffect(() => { load(); }, [q]);
 
