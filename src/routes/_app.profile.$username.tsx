@@ -46,6 +46,14 @@ function ProfilePage() {
   };
   useEffect(() => { load(); }, [username, user?.id]);
 
+  useEffect(() => {
+    if (!profile?.id) return;
+    const ch = supabase.channel(`profile-posts-${profile.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts", filter: `user_id=eq.${profile.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [profile?.id]);
+
   if (!profile) return <div className="p-10 text-center text-muted-foreground">Carregando perfil...</div>;
   const isOwn = user?.id === profile.id;
 
