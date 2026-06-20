@@ -129,9 +129,9 @@ function GridThumb({ post }: { post: never }) {
   const [url, setUrl] = useState("");
   useEffect(() => { if (p.media_urls[0]) resolveMedia(p.media_urls[0]).then(setUrl); }, [p.media_urls]);
   return (
-    <div className="aspect-square bg-muted overflow-hidden">
+    <Link to="/post/$id" params={{ id: p.id }} className="aspect-square bg-muted overflow-hidden block hover:opacity-90 transition">
       {url && (url.match(/\.(mp4|webm|mov)/i) ? <video src={url} className="h-full w-full object-cover" /> : <img src={url} alt="" className="h-full w-full object-cover" />)}
-    </div>
+    </Link>
   );
 }
 
