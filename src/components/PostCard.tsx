@@ -62,11 +62,11 @@ export function PostCard({ post, onDeleted }: { post: any; onDeleted?: () => voi
     if (!user) return;
     if (liked) {
       setLiked(false);
-      setLikes(l => l - 1);
+      setLikes((l: number) => l - 1);
       await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
     } else {
       setLiked(true);
-      setLikes(l => l + 1);
+      setLikes((l: number) => l + 1);
       await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id } as any);
       if (post.user_id !== user.id) {
         await supabase.from("notifications").insert({ user_id: post.user_id, actor_id: user.id, kind: "like", entity_id: post.id } as any);
