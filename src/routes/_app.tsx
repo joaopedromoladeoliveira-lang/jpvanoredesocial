@@ -21,6 +21,38 @@ function AppLayout() {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`notif-toast-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        async (payload: any) => {
+          const n = payload.new;
+          let actorName = "Alguém";
+          if (n.actor_id) {
+            const { data } = await supabase.from("profiles").select("username,display_name").eq("id", n.actor_id).maybeSingle();
+            if (data) actorName = (data as any).display_name || `@${(data as any).username}`;
+          }
+          const text =
+            n.kind === "like" ? "curtiu seu post" :
+            n.kind === "comment" ? `comentou: ${n.content ?? ""}` :
+            n.kind === "share" ? "compartilhou seu post" :
+            n.kind === "follow" ? "começou a seguir você" :
+            n.kind === "message" ? `enviou uma mensagem: ${n.content ?? ""}` :
+            n.content || "nova notificação";
+          toast(`${actorName} ${text}`, {
+            action: n.entity_id && (n.kind === "like" || n.kind === "comment" || n.kind === "share")
+              ? { label: "Ver", onClick: () => navigate({ to: "/post/$id", params: { id: n.entity_id } }) }
+              : { label: "Abrir", onClick: () => navigate({ to: "/notifications" }) },
+          });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id, navigate]);
+
   if (loading || !user) {
     return <div className="flex min-h-screen items-center justify-center"><Logo size={48} /></div>;
   }
