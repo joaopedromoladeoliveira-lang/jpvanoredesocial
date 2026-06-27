@@ -84,6 +84,21 @@ export function PostCard({ post, onDeleted }: { post: any; onDeleted?: () => voi
     }
   };
 
+  const sharePost = async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ url, title: "JPvano", text: post.caption || "" });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      }
+    } catch { /* user cancelled */ }
+    if (user && post.user_id !== user.id) {
+      await supabase.from("notifications").insert({ user_id: post.user_id, actor_id: user.id, kind: "share", entity_id: post.id } as any);
+    }
+  };
+
   const canDelete = user?.id === post.user_id || isAdmin;
 
   return (
@@ -133,6 +148,7 @@ export function PostCard({ post, onDeleted }: { post: any; onDeleted?: () => voi
         <div className="flex items-center gap-2">
           <button onClick={toggleLike} className="p-2 hover:scale-110 transition"><Heart className={`h-7 w-7 ${liked ? "fill-[var(--brand-pink)] text-[var(--brand-pink)]" : ""}`} /></button>
           <button onClick={() => setShowComments(!showComments)} className="p-2 hover:scale-110 transition"><MessageCircle className="h-7 w-7" /></button>
+          <button onClick={sharePost} className="p-2 hover:scale-110 transition" aria-label="Compartilhar"><Send className="h-7 w-7" /></button>
           <button className="ml-auto p-2 hover:scale-110 transition"><Bookmark className="h-7 w-7" /></button>
         </div>
         
