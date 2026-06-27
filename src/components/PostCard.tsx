@@ -133,6 +133,7 @@ export function PostCard({ post, onDeleted }: { post: any; onDeleted?: () => voi
         <div className="flex items-center gap-2">
           <button onClick={toggleLike} className="p-2 hover:scale-110 transition"><Heart className={`h-7 w-7 ${liked ? "fill-[var(--brand-pink)] text-[var(--brand-pink)]" : ""}`} /></button>
           <button onClick={() => setShowComments(!showComments)} className="p-2 hover:scale-110 transition"><MessageCircle className="h-7 w-7" /></button>
+          <button onClick={sharePost} className="p-2 hover:scale-110 transition" aria-label="Compartilhar"><Send className="h-7 w-7" /></button>
           <button className="ml-auto p-2 hover:scale-110 transition"><Bookmark className="h-7 w-7" /></button>
         </div>
         
