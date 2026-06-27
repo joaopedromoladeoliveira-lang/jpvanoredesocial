@@ -5,6 +5,8 @@ import { Logo } from "@/components/Logo";
 import { Home, Compass, Film, MessageCircle, Bell, Settings, Shield, BadgeCheck, LogOut, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/Avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
