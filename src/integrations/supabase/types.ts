@@ -638,6 +638,7 @@ export type Database = {
         | "message"
         | "verification"
         | "system"
+        | "share"
       payment_status: "pending" | "paid" | "failed" | "refunded" | "expired"
       post_kind: "photo" | "video" | "carousel" | "reel" | "text"
       verification_status: "pending" | "reviewing" | "approved" | "rejected"
@@ -785,6 +786,7 @@ export const Constants = {
         "message",
         "verification",
         "system",
+        "share",
       ],
       payment_status: ["pending", "paid", "failed", "refunded", "expired"],
       post_kind: ["photo", "video", "carousel", "reel", "text"],
